@@ -17,9 +17,17 @@ students = [
 
 app = Flask(__name__)
 
-@app.route("/students")
+@app.route('/')
 def home():
+    return "<h1> Home Page </h1>"
+
+@app.route("/students")
+def students():
     return jsonify(students)
+
+@app.route("/test")
+def testing():
+    return "Test"
 
 
 @app.route("/student/<int:id>")
