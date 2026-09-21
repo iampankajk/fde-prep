@@ -21,19 +21,61 @@ app = Flask(__name__)
 def home():
     return "<h1> Home Page </h1>"
 
-@app.route("/students")
+@app.route("/students", methods=["GET","POST"])
 def students():
-    return jsonify(students)
+    if request.method == "GET":
+        return jsonify(students)
+
+    if request.method == "POST":
+
+        data = request.json()
+
+        id = len(students) + 1
+        name = data["name"]
+        age  = data["age"]
+        course = data["course"]
+
+        student = {
+            "id":id,
+            "name":name,
+            "age":age,
+            "course":course
+        }
+
+        students.append(student)
+        return jsonify(student)
+
 
 @app.route("/test")
 def testing():
     return "Test"
 
 
-@app.route("/student/<int:id>")
-def test(id):
-    student  = list(filter(lambda x : x["id"] == id, students))
-    return jsonify(student[0])
+@app.route("/student/<int:id>", methods = ["GET", "PUT"])
+def get_student(id):
+    if request.method == "GET":
+        for student in students:
+            if id == student['id']:
+                return jsonify(student)
+
+        return "NOT FOUND"
+
+    if request.method == "PUT":
+        data = request.json()
+        
+        name = data["name"]
+        age  = data["age"]
+        course = data["course"]
+
+        for student in students:
+            if id == student["id"]:
+                student["name"] = name
+                student["age"] = age
+                student["course"] = course
+
+                return jsonify(student)
+
+        return "NOT Found"
 
 if __name__ == "__main__":
     app.run()
