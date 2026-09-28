@@ -45,16 +45,19 @@ def get_students():
 
 @app.route('/student', methods = ["POST"])
 def add_student():
+    api_key = request.headers.get("X-API-KEY")
     data = request.get_json()
     id = len(students) + 1
     name = data["name"]
     age = data["age"]
     course = data["course"]
 
-    student = {"id":id , "name":name, "age":age, "course":course}
-    students.append(student)
+    if api_key == "abc123def":
+        student = {"id":id , "name":name, "age":age, "course":course}
+        students.append(student)
+        return jsonify({"message":"student added successfully", "data":student}), 201
 
-    return jsonify({"message":"student added successfully", "data":student}), 201
+    return jsonify({"message":"wrong api key"}), 401
 
 @app.route('/student/<int:id>', methods = ["GET"])
 def get_student_by_id(id):
