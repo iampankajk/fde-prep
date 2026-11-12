@@ -89,3 +89,23 @@ Ans:
    POST No No (generally) Usually creates a new resource or performs an operation.
    PUT No Yes Replaces or creates a resource with the specified representation.
    DELETE No Yes Deletes a resource; repeating the deletion has the same intended effect.
+
+Q11. A teammate's script calls a partner API with requests.get(url) and no timeout, inside a nightly job.
+One night the partner's server accepts the connection but never answers. What happens to the job, and
+what would you change?
+
+Ans: If we call requests.get() without a timeout, the request can remain blocked indefinitely if the partner accepts the connection but never responds. This can cause our nightly job to hang.
+
+I'd add connection and read timeouts, such as timeout=(3, 10), handle timeout and connection exceptions, and implement bounded retries with exponential backoff for transient failures. I'd also add structured logging, monitoring, and a job-level deadline to ensure the entire pipeline remains resilient.
+
+Q12. A partner API returns 429 with Retry-After: 30 . Your script retries immediately in a tight loop. What
+are the consequences, and how should the client behave instead?
+
+Ans: If an API returns 429 with Retry-After: 30, retrying immediately will generate unnecessary traffic, increase server load, potentially trigger temporary IP or API-key blocking, and waste client resources.
+
+I'd respect the Retry-After header by waiting 30 seconds before making another request. If the header is missing, I'd use exponential backoff. I'd also implement bounded retries and proper logging.
+
+Q13. A colleague calls GET https://api.example.com/tickets?api_key=SECRET123 . Give two risks of putting
+the key in the URL and describe the better approach.
+
+Ans: Putting API keys in URLs can expose them through browser history, server logs, proxy logs, and accidental URL sharing. Instead, I'd send the key through an HTTP header such as X-API-KEY, use HTTPS for encryption, and store the key securely in environment variables.
